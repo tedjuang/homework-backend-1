@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import com.example.demo.model.Notification;
 import com.example.demo.repository.NotificationRepository;
 
-// Service for handling Notification business logic (MySQL only)
 @Service
 public class NotificationService {
     private final NotificationRepository notificationRepository;
@@ -20,20 +19,17 @@ public class NotificationService {
         this.notificationRepository = notificationRepository;
     }
 
-    // Create a new notification
     public Notification createNotification(String type, String recipient, String subject, String content) {
         Notification notification = new Notification(type, recipient, subject, content, LocalDateTime.now());
         return notificationRepository.save(notification);
     }
 
-    // Get notification by ID
     public Optional<Notification> getNotificationById(Long id) {
         return notificationRepository.findById(id);
     }
 
-    // Get all notifications (for recent, limit can be added later)
-    public List<Notification> getAllNotifications() {
-        return notificationRepository.findAll();
+    public List<Notification> getRecentNotifications() {
+        return notificationRepository.findTop10ByOrderByCreatedAtDesc();
     }
 
     // Update notification subject and content
@@ -50,7 +46,6 @@ public class NotificationService {
         }
     }
 
-    // Delete notification by ID
     public boolean deleteNotification(Long id) {
         if (notificationRepository.existsById(id)) {
             notificationRepository.deleteById(id);

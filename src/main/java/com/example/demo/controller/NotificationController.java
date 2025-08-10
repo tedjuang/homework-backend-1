@@ -22,7 +22,6 @@ import com.example.demo.dto.UpdateNotificationRequest;
 import com.example.demo.model.Notification;
 import com.example.demo.service.NotificationService;
 
-// REST controller for Notification API (MySQL only)
 @RestController
 @RequestMapping("/notifications")
 public class NotificationController {
@@ -33,7 +32,6 @@ public class NotificationController {
         this.notificationService = notificationService;
     }
 
-    // Create notification
     @PostMapping
     public ResponseEntity<NotificationResponse> createNotification(@RequestBody CreateNotificationRequest request) {
         Notification notification = notificationService.createNotification(
@@ -45,7 +43,6 @@ public class NotificationController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    // Get notification by ID
     @GetMapping("/{id}")
     public ResponseEntity<NotificationResponse> getNotificationById(@PathVariable Long id) {
         Optional<Notification> optional = notificationService.getNotificationById(id);
@@ -56,17 +53,16 @@ public class NotificationController {
         }
     }
 
-    // Get all notifications (for now, as recent API)
+    // Get recent notifications (latest 10)
     @GetMapping("/recent")
     public ResponseEntity<List<NotificationResponse>> getRecentNotifications() {
-        List<Notification> notifications = notificationService.getAllNotifications();
+        List<Notification> notifications = notificationService.getRecentNotifications();
         List<NotificationResponse> responses = notifications.stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
 
-    // Update notification
     @PutMapping("/{id}")
     public ResponseEntity<NotificationResponse> updateNotification(@PathVariable Long id,
             @RequestBody UpdateNotificationRequest request) {
@@ -79,7 +75,6 @@ public class NotificationController {
         }
     }
 
-    // Delete notification
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteNotification(@PathVariable Long id) {
         boolean deleted = notificationService.deleteNotification(id);
