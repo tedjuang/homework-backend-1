@@ -19,8 +19,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.CreateNotificationRequest;
 import com.example.demo.dto.NotificationResponse;
 import com.example.demo.dto.UpdateNotificationRequest;
+import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Notification;
 import com.example.demo.service.NotificationService;
+
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/notifications")
@@ -33,7 +36,8 @@ public class NotificationController {
     }
 
     @PostMapping
-    public ResponseEntity<NotificationResponse> createNotification(@RequestBody CreateNotificationRequest request) {
+    public ResponseEntity<NotificationResponse> createNotification(
+            @Valid @RequestBody CreateNotificationRequest request) {
         Notification notification = notificationService.createNotification(
                 request.type(),
                 request.recipient(),
@@ -49,7 +53,7 @@ public class NotificationController {
         if (optional.isPresent()) {
             return ResponseEntity.ok(toResponse(optional.get()));
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Notification with id " + id + " not found");
         }
     }
 
@@ -65,13 +69,13 @@ public class NotificationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<NotificationResponse> updateNotification(@PathVariable Long id,
-            @RequestBody UpdateNotificationRequest request) {
+            @Valid @RequestBody UpdateNotificationRequest request) {
         Optional<Notification> optional = notificationService.updateNotification(id, request.subject(),
                 request.content());
         if (optional.isPresent()) {
             return ResponseEntity.ok(toResponse(optional.get()));
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Notification with id " + id + " not found");
         }
     }
 
@@ -81,7 +85,7 @@ public class NotificationController {
         if (deleted) {
             return ResponseEntity.noContent().build();
         } else {
-            return ResponseEntity.notFound().build();
+            throw new NotFoundException("Notification with id " + id + " not found");
         }
     }
 

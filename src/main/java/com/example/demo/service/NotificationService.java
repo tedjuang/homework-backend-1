@@ -15,6 +15,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.NotificationMessage;
 import com.example.demo.model.Notification;
 import com.example.demo.repository.NotificationRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -28,6 +29,7 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final ObjectMapper objectMapper;
+    private final RocketMQProducer rocketMQProducer;
 
     private static final String RECENT_NOTIFICATIONS_KEY = "recent_notifications";
     private static final int RECENT_NOTIFICATIONS_LIMIT = 10;
@@ -38,10 +40,11 @@ public class NotificationService {
     private DefaultRedisScript<Long> refreshListScript;
 
     public NotificationService(NotificationRepository notificationRepository,
-            RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper) {
+            RedisTemplate<String, String> redisTemplate, ObjectMapper objectMapper, RocketMQProducer rocketMQProducer) {
         this.notificationRepository = notificationRepository;
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
+        this.rocketMQProducer = rocketMQProducer;
     }
 
     // Load Lua scripts after dependencies are injected
@@ -77,6 +80,15 @@ public class NotificationService {
         Notification notification = new Notification(type, recipient, subject, content, LocalDateTime.now());
         Notification savedNotification = notificationRepository.save(notification);
 
+        // Send message to RocketMQ (using async method to avoid blocking)
+        NotificationMessage message = new NotificationMessage(
+                type,
+                recipient,
+                subject,
+                content);
+
+        rocketMQProducer.sendMessage("notification-topic", message);
+
         // Atomically update recent notifications cache via Lua script
         try {
             String json = objectMapper.writeValueAsString(savedNotification);
@@ -92,7 +104,7 @@ public class NotificationService {
     }
 
     // Get notification by ID
-    @Cacheable(value = "notification", key = "#id")
+    @Cacheable(value = "notification", key = "#id", unless = "#result == null")
     public Optional<Notification> getNotificationById(Long id) {
         return notificationRepository.findById(id);
     }

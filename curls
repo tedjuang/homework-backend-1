@@ -1,0 +1,41 @@
+ curl -X POST http://localhost:8080/notifications \
+  -H "Content-Type: application/json" \
+  -d '{
+    "type": "email",
+    "recipient": "user@example.com",
+    "subject": "Welcome!",
+    "content": "Thanks for signing up!"
+  }'
+{"id":49,"type":"email","recipient":"user@example.com","subject":"Welcome!","content":"Thanks for signing up!","createdAt":"2025-08-11T10:15:35.932981"}%    
+
+curl -X POST http://localhost:8080/notifications \
+-H "Content-Type: application/json" \
+-d '{
+  "type": "push",
+  "recipient": "user@example.com",
+  "subject": "Welcome!",
+  "content": "Thanks for signing up!"
+}'
+{"status":400,"error":"Bad Request","message":"type: type must be 'sms' or 'email'","timestamp":"2025-08-11T10:16:11.427236","path":"/notifications"}%    
+
+curl -X GET http://localhost:8080/notifications/1
+{"status":404,"error":"Not Found","message":"Notification with id 1 not found","timestamp":"2025-08-11T10:21:30.838895","path":"/notifications/1"}%      
+
+❯ curl -X GET http://localhost:8080/notifications/20
+{"id":20,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-10T22:02:29.52591"}%    
+
+
+curl -X GET http://localhost:8080/notifications/recent
+[{"id":49,"type":"email","recipient":"user@example.com","subject":"Welcome!","content":"Thanks for signing up!","createdAt":"2025-08-11T10:15:35.932981"},{"id":48,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T10:14:46.63677"},{"id":47,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:46:38.361386"},{"id":46,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:44:13.322416"},{"id":45,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:44:09.708317"},{"id":44,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:35:58.299998"},{"id":43,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:35:16.735053"},{"id":42,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:32:14.869368"},{"id":41,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T09:00:23.621253"},{"id":40,"type":"email","recipient":"mqtest@example.com","subject":"RocketMQ Test","content":"This message should go to RocketMQ!","createdAt":"2025-08-11T07:06:48.386732"}]% 
+
+curl -X PUT http://localhost:8080/notifications/20 \  
+  -H "Content-Type: application/json" \
+  -d '{
+    "subject": "Updated subject line",
+    "content": "Updated content of the notification"
+  }'
+{"id":20,"type":"email","recipient":"mqtest@example.com","subject":"Updated subject line","content":"Updated content of the notification","createdAt":"2025-08-10T22:02:29.52591"}%  
+
+
+curl -X DELETE http://localhost:8080/notifications/99999
+{"status":404,"error":"Not Found","message":"Notification with id 99999 not found","timestamp":"2025-08-11T10:19:52.420855","path":"/notifications/99999"}%                                 

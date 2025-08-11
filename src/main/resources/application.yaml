@@ -17,4 +17,11 @@ spring:
   redis:
     host: localhost
     port: 6379
-# define rocketmq properties here
+
+rocketmq:
+  name-server: localhost:9876
+  producer:
+    group: notification-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-next-server: true
